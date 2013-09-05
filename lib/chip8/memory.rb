@@ -15,5 +15,4 @@ module Chip8
       @page[address]
     end
   end
-
 end
