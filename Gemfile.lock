@@ -1,8 +1,20 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.4.3)
+    builder (3.2.2)
     coderay (1.0.9)
+    hashie (2.0.5)
     method_source (0.8.2)
+    minitest (4.7.5)
+    minitest-reporters (0.14.20)
+      ansi
+      builder
+      minitest (>= 2.12, < 5.0)
+      powerbar
+    powerbar (1.0.11)
+      ansi (~> 1.4.0)
+      hashie (>= 1.1.0)
     pry (0.9.12.2)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -13,4 +25,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  minitest-reporters
   pry
