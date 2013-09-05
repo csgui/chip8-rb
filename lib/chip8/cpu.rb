@@ -9,6 +9,7 @@ module Chip8
     def initialize
       @memory = Memory.new
       @registers = Registers.new
+      @stack = Array.new(0x10, 0x0)
       @i = 0x0
       @pc = 0x200 # Program starts at 0x200 memory position
       @halted = false
@@ -41,19 +42,26 @@ module Chip8
     def decode
       # address. A 12-bit value, the lowest 12 bits of the instruction
       @nnn = @opcode & 0x0FFF
+
       # byte. An 8-bit value, the lowest 8 bits of the instruction
       @nn = @opcode & 0x00FF
+
       # nibble. A 4-bit value, the lowest 4 bits of the instruction
       @n = @opcode & 0x000F
+
       # register X. A 4-bit value, the lower 4 bits of the high byte of the instruction
       @x = (@opcode & 0x0F00) >> 8
+
       #register Y. A 4-bit value, the upper 4 bits of the low byte of the instruction
       @y = (@opcode & 0x00F0) >> 4
     end
 
     def execute
       case (@opcode & 0xF000) >> 12
-      when 0x1 # Jump to location nnn.
+      when 0x1 # Jump to instruction at memory location nnn.
+        @pc = @nnn
+      when 0x2 # Calls a subroutine at memory location nnn.
+        @stack.push(@pc)
         @pc = @nnn
       end
     end
