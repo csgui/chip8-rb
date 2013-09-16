@@ -2,16 +2,25 @@
 
 require 'chip8'
 
-class Emulator
-  def initialize
-    @cpu = Chip8::CPU.new
+module Chip8
+  def self.start(rom)
+    emulator = Emulator.new
+    emulator.load(rom)
+    emulator.run
   end
 
-  def start(rom)
-    @cpu.memory.load(rom)
-    @cpu.run
-  end
+  class Emulator
+    def load(rom)
+      @memory = Chip8::Memory.new
+      @memory.load(rom)
+    end
 
+    def run
+      cpu = Chip8::CPU.new
+      cpu.memory = @memory
+      cpu.emulate
+    end
+  end
 end
 
-Emulator.new.start(ARGV[0])
+Chip8.start(ARGV[0])
