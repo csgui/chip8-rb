@@ -6,4 +6,6 @@ end
 
 group :test do
   gem 'minitest-reporters'
+  gem 'mocha'
+  gem 'rspec'
 end
