@@ -4,7 +4,7 @@ require_relative 'registers'
 module Chip8
   class CPU
 
-    attr_accessor :memory, :pc, :registers
+    attr_accessor :memory, :pc, :registers, :stack
 
     def initialize
       @pc = 0x200 # Program starts at 0x200 memory position
@@ -18,12 +18,11 @@ module Chip8
       @halted = true
     end
 
-    # One cycle of the Chip8 CPU corresponds to
-    # fetch, decode and execute one opcode.
     def emulate
       cycle while not @halted
     end
 
+    # The CPU instruction cycle.
     def cycle
       fetch
       decode

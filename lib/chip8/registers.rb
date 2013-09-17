@@ -8,5 +8,13 @@ module Chip8
     def initialize
       @v = Array.new(0x10, 0x0)
     end
+
+    def [](address)
+      @v[address]
+    end
+
+    def []=(address, value)
+      @v[address] = value
+    end
   end
 end
