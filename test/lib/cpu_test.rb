@@ -358,7 +358,7 @@ describe Chip8::CPU do
           cpu.registers[0xF].must_equal(0x0)
         end
 
-        it 'divide VX by 2' do
+        it 'shifts VX right by one' do
           cpu.memory = []
           cpu.memory[0x200] = 0x81
           cpu.memory[0x201] = 0x76
@@ -415,9 +415,38 @@ describe Chip8::CPU do
         end
       end
 
+      describe 'instruction 0x8XYE' do
+        it 'set VF to 0x1 if the most-significant bit of VX is 1' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0x81
+          cpu.memory[0x201] = 0x6E
+          cpu.registers[0x1] = 0x80
+          cpu.cycle
+
+          cpu.registers[0xF].must_equal(0x1)
+        end
+
+        it 'set VF to 0x0 if the most-significant bit of VX is 0' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0x81
+          cpu.memory[0x201] = 0x6E
+          cpu.registers[0x1] = 0x50
+          cpu.cycle
+
+          cpu.registers[0xF].must_equal(0x0)
+        end
+
+        it 'shifts VX left by one' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0x84
+          cpu.memory[0x201] = 0x5E
+          cpu.registers[0x4] = 0x3
+          cpu.cycle
+
+          cpu.registers[0x4].must_equal(0x6)
+        end
+      end
 
     end
   end
-
-
 end

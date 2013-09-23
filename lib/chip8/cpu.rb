@@ -101,7 +101,7 @@ module Chip8
           # If the least-significant bit of VX is 1, then VF is set to 1, otherwise 0.
           # Then VX is divided by 2.
           @registers[0xF] = (@registers[@x] & 0x1) == 0x1 ? 0x1 : 0x0
-          @registers[@x] >>= 1
+          @registers[@x] = (@registers[@x] >> 1) & 0x00FF
         when 0x7
           # VX is subtracted from VY.
           # VF is set to 0 when there's a borrow, and 1 when there isn't.
@@ -111,7 +111,7 @@ module Chip8
           # If the most-significant bit of VX is 1, then VF is set to 1, otherwise to 0.
           # Then VX is multiplied by 2.
           @registers[0xF] = (@registers[@x] >> 0x7) == 0x1 ? 0x1 : 0x0
-          @registers[@x] <<= 1
+          @registers[@x] = (@registers[@x] << 1) & 0x00FF
         end
       end
 
