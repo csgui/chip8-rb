@@ -1,6 +1,8 @@
 module Chip8
   class Memory
 
+    PROGRAM_OFFSET = 0x200
+
     def initialize
       @page = Array.new(0x1000, 0x0)
     end
@@ -9,9 +11,9 @@ module Chip8
       @page[address]
     end
 
-    def load(rom)
-      File.open(rom, 'rb') { |f| f.read }.unpack('C*').each_with_index do |byte, i|
-        @page[0x200 + i] = byte
+    def load(bytecode)
+      bytecode.each_with_index do |byte, i|
+        @page[PROGRAM_OFFSET + i] = byte
       end
     end
 

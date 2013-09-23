@@ -9,7 +9,7 @@ module Chip8
     def initialize
       @pc = 0x200 # Program starts at 0x200 memory position
       @registers = Registers.new
-      @stack = Array.new(0x10, 0x0)
+      @stack = Array.new
       @i = 0x0
       @halted = false
     end
@@ -76,6 +76,43 @@ module Chip8
         @registers[@x] = @nn
       when 0x7 # Adds NN to VX.
         @registers[@x] += @nn
+      when 0x8
+        case (@opcode & 0x000F)
+        when 0x0 # Sets VX to VY.
+          @registers[@x] = @registers[@y]
+        when 0x1 # Performs a bitwise OR on the values of VX and VY.
+          @registers[@x] |= @registers[@y]
+        when 0x2 # Performs a bitwise AND on the values of VX and VY.
+          @registers[@x] &= @registers[@y]
+        when 0x3 # Performs a bitwise XOR on the values of VX and VY.
+          @registers[@x] ^= @registers[@y]
+        when 0x4
+          # The values of VX and VY are added together.
+          # If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0.
+          # Only the lowest 8 bits of the result are kept, and stored in VX.
+          @registers[0xF] = @registers[@x] + @registers[@y] > 0xFF ? 0x1 : 0x0
+          @registers[@x] = (@registers[@x] + @registers[@y]) & 0x00FF
+        when 0x5
+          # VY is subtracted from VX.
+          # VF is set to 0 when there's a borrow, and 1 when there isn't.
+          @registers[0xF] = @registers[@x] >= @registers[@y] ? 0x1 : 0x0
+          @registers[@x] = (@registers[@x] - @registers[@y]) & 0x00FF
+        when 0x6
+          # If the least-significant bit of VX is 1, then VF is set to 1, otherwise 0.
+          # Then VX is divided by 2.
+          @registers[0xF] = (@registers[@x] & 0x1) == 0x1 ? 0x1 : 0x0
+          @registers[@x] >>= 1
+        when 0x7
+          # VX is subtracted from VY.
+          # VF is set to 0 when there's a borrow, and 1 when there isn't.
+          @registers[0xF] = @registers[@y] >= @registers[@x] ? 0x1 : 0x0
+          @registers[@x] = (@registers[@y] - @registers[@x]) & 0x00FF
+        when 0xE
+          # If the most-significant bit of VX is 1, then VF is set to 1, otherwise to 0.
+          # Then VX is multiplied by 2.
+          @registers[0xF] = (@registers[@x] >> 0x7) == 0x1 ? 0x1 : 0x0
+          @registers[@x] <<= 1
+        end
       end
 
     end # end execute

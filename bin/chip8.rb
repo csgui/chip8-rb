@@ -11,8 +11,9 @@ module Chip8
 
   class Emulator
     def load(rom)
+      bytecode = File.open(rom, 'rb') { |f| f.read }.unpack('C*')
       @memory = Chip8::Memory.new
-      @memory.load(rom)
+      @memory.load(bytecode)
     end
 
     def run
