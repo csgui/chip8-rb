@@ -122,6 +122,9 @@ module Chip8
       when 0xB
         # Jump to location NNN + V0.
         @pc = @nnn + @registers[0x0]
+      when 0xC
+        # Set Vx = random byte AND NN.
+        @registers[@x] = rand(255) & @nn
       end
 
     end # end execute

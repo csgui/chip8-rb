@@ -494,6 +494,10 @@ describe Chip8::CPU do
         end
       end
 
+      describe 'instruction 0xCXNN' do
+        it 'sets VX to an random number AND NN'
+      end
+
     end
   end
 end
