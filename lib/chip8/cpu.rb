@@ -125,6 +125,27 @@ module Chip8
       when 0xC
         # Set Vx = random byte AND NN.
         @registers[@x] = rand(255) & @nn
+      when 0xD
+        # Draw a sprite at position VX, VY with N bytes of sprite data
+        # starting at the address stored in I.
+        # Set VF to 1 if any set pixels are changed to unset, and 00 otherwise.
+      when 0xE
+        case @nn
+        when 0x9E
+        when 0xA1
+        end
+      when 0xF
+        case @nn
+        when 0x07
+        when 0x0A
+        when 0x15
+        when 0x18
+        when 0x1E
+        when 0x29
+        when 0x33
+        when 0x55
+        when 0x65
+        end
       end
 
     end # end execute

@@ -498,6 +498,54 @@ describe Chip8::CPU do
         it 'sets VX to an random number AND NN'
       end
 
+      describe 'instruction 0xDXYN' do
+        it 'draw a sprite at position VX, VY'
+      end
+
+      describe 'instruction 0xEX9E' do
+        it 'Skip next instruction if key with the value of Vx is pressed'
+      end
+
+      describe 'instruction 0xEXA1' do
+        it 'Skip next instruction if key with the value of Vx is not pressed'
+      end
+
+      describe 'instruction 0xFX07' do
+        it ''
+      end
+
+      describe 'instruction 0xFX0A' do
+        it ''
+      end
+
+      describe 'instruction 0xFX15' do
+        it ''
+      end
+
+      describe 'instruction 0xFX18' do
+        it ''
+      end
+
+      describe 'instruction 0xFX1E' do
+        it ''
+      end
+
+      describe 'instruction 0xFX29' do
+        it ''
+      end
+
+      describe 'instruction 0xFX33' do
+        it ''
+      end
+
+      describe 'instruction 0xFX55' do
+        it ''
+      end
+
+      describe 'instruction 0xFX65' do
+        it ''
+      end
+
     end
   end
 end
