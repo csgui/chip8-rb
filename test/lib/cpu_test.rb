@@ -447,6 +447,30 @@ describe Chip8::CPU do
         end
       end
 
+      describe 'instruction 0x9XY0' do
+        it 'skip next instruction if VX is not equal VY' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0x95
+          cpu.memory[0x201] = 0x10
+          cpu.registers[0x5] = 0x12
+          cpu.registers[0x1] = 0xA
+          cpu.cycle
+
+          cpu.pc.must_equal(0x202)
+        end
+
+        it 'not skip next instruction if VX is equal VY' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0x95
+          cpu.memory[0x201] = 0x10
+          cpu.registers[0x5] = 0x12
+          cpu.registers[0x1] = 0x12
+          cpu.cycle
+
+          cpu.pc.must_equal(0x200)
+        end
+      end
+
     end
   end
 end

@@ -68,9 +68,9 @@ module Chip8
         @pc = @nnn
       when 0x3 # Skips the next instruction if VX equals NN.
         @pc += 0x2 if @registers[@x] == @nn
-      when 0x4 # Skips the next instruction if VX doesn't equal NN.
+      when 0x4 # Skips next instruction if VX doesn't equal NN
         @pc += 0x2 if @registers[@x] != @nn
-      when 0x5 # Skips the next instruction if VX equals VY.
+      when 0x5 # Skips next instruction if VX equals VY.
         @pc += 0x2 if @registers[@x] == @registers[@y]
       when 0x6 # Sets VX to NN.
         @registers[@x] = @nn
@@ -113,6 +113,9 @@ module Chip8
           @registers[0xF] = (@registers[@x] >> 0x7) == 0x1 ? 0x1 : 0x0
           @registers[@x] = (@registers[@x] << 1) & 0x00FF
         end
+      when 0x9
+        # Skip next instruction if VX != VY.
+        @pc += 0x2 if @registers[@x] != @registers[@y]
       end
 
     end # end execute
