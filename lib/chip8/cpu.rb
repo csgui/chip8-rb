@@ -4,7 +4,7 @@ require_relative 'registers'
 module Chip8
   class CPU
 
-    attr_accessor :memory, :pc, :registers, :stack, :i
+    attr_accessor :memory, :pc, :registers, :stack, :i, :dt, :st
 
     def initialize
       @pc = 0x200 # Program starts at 0x200 memory position
@@ -12,6 +12,8 @@ module Chip8
       @stack = Array.new
       @i = 0x0
       @halted = false
+      @dt = 0x0
+      @st = 0x0
     end
 
     def halt
@@ -137,14 +139,33 @@ module Chip8
       when 0xF
         case @nn
         when 0x07
+          # Store the current value of the delay timer in register VX.
+          @registers[@x] = @dt
         when 0x0A
         when 0x15
+          # Set delay timer to the value of register VX.
+          @dt = @registers[@x]
         when 0x18
+          # Set the sound timer to the value of register VX.
+          @st = @registers[@x]
         when 0x1E
+          # Add the value stored in register VX to register I.
+          @i += @registers[@x]
         when 0x29
+          # Sets I to the location of the sprite for the character in VX.
+          @i = @registers[@x] * 5
         when 0x33
+          # Stores the Binary-coded decimal representation of VX
+          # at memory addresses I, I + 1 and I + 2.
+          memory[@i] = registers[@x] / 100
+          memory[@i + 1] = (registers[@x] / 10) % 10
+          memory[@i + 2] = registers[@x] % 10
         when 0x55
+          # Store registers V0 through VX in memory starting at location I.
+          (0..@x).each { |r| memory[@i + r] = @registers[r] }
         when 0x65
+          # Read registers V0 through VX from memory starting at location I.
+          (0..@x).each { |r| @registers[r] = memory[@i + r] }
         end
       end
 

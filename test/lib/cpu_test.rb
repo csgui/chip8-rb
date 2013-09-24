@@ -503,15 +503,23 @@ describe Chip8::CPU do
       end
 
       describe 'instruction 0xEX9E' do
-        it 'Skip next instruction if key with the value of Vx is pressed'
+        it 'skip next instruction if key with the value of Vx is pressed'
       end
 
       describe 'instruction 0xEXA1' do
-        it 'Skip next instruction if key with the value of Vx is not pressed'
+        it 'skip next instruction if key with the value of Vx is not pressed'
       end
 
       describe 'instruction 0xFX07' do
-        it ''
+        it 'store the value of the delay timer in register VX.' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF1
+          cpu.memory[0x201] = 0x07
+          cpu.dt = 0xA
+          cpu.cycle
+
+          cpu.registers[0x1].must_equal(0xA)
+        end
       end
 
       describe 'instruction 0xFX0A' do
@@ -519,31 +527,124 @@ describe Chip8::CPU do
       end
 
       describe 'instruction 0xFX15' do
-        it ''
+        it 'set delay timer to the value of register VX' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF3
+          cpu.memory[0x201] = 0x15
+          cpu.registers[0x3] = 0xC
+          cpu.cycle
+
+          cpu.dt.must_equal(0xC)
+        end
       end
 
       describe 'instruction 0xFX18' do
-        it ''
+        it 'set sound timer to the value of register VX' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF2
+          cpu.memory[0x201] = 0x18
+          cpu.registers[0x2] = 0x5
+          cpu.cycle
+
+          cpu.st.must_equal(0x5)
+        end
       end
 
       describe 'instruction 0xFX1E' do
-        it ''
+        it 'adds VX to I' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF7
+          cpu.memory[0x201] = 0x1E
+          cpu.registers[0x7] = 0x5
+          cpu.i = 0x2
+          cpu.cycle
+
+          cpu.i.must_equal(0x7)
+        end
       end
 
       describe 'instruction 0xFX29' do
-        it ''
+        it 'sets I to the location of the sprite in VX' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF3
+          cpu.memory[0x201] = 0x29
+          cpu.registers[0x3] = 0x5
+          cpu.cycle
+
+          cpu.i.must_equal(0x19)
+        end
       end
 
+      # TODO Needs improvement on these tests description
       describe 'instruction 0xFX33' do
-        it ''
+        it 'store BCD digit at I' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF4
+          cpu.memory[0x201] = 0x33
+          cpu.i = 0x1
+          cpu.registers[0x4] = 0xAAC
+          cpu.cycle
+
+          cpu.memory[0x1].must_equal(0x1B)
+        end
+
+        it 'store BCD digit at I + 1' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF4
+          cpu.memory[0x201] = 0x33
+          cpu.i = 0x1
+          cpu.registers[0x4] = 0xAAC
+          cpu.cycle
+
+          cpu.memory[0x2].must_equal(0x3)
+        end
+
+        it 'store BCD digit at I + 2' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF4
+          cpu.memory[0x201] = 0x33
+          cpu.i = 0x1
+          cpu.registers[0x4] = 0xAAC
+          cpu.cycle
+
+          cpu.memory[0x3].must_equal(0x2)
+        end
       end
 
       describe 'instruction 0xFX55' do
-        it ''
+        it 'store registers V0 through VX in memory starting at location I' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF3
+          cpu.memory[0x201] = 0x55
+          cpu.i = 0x1
+          cpu.registers[0x0] = 0xA
+          cpu.registers[0x1] = 0xB
+          cpu.registers[0x2] = 0xC
+          cpu.registers[0x3] = 0xD
+          cpu.cycle
+
+          (0..3).each do |r|
+            cpu.memory[cpu.i + r].must_equal(cpu.registers[r])
+          end
+        end
       end
 
       describe 'instruction 0xFX65' do
-        it ''
+        it 'read registers V0 through VX from memory starting at location I' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xF3
+          cpu.memory[0x201] = 0x65
+          cpu.i = 0x1
+          cpu.memory[0x1] = 0xA
+          cpu.memory[0x2] = 0xB
+          cpu.memory[0x3] = 0xC
+          cpu.memory[0x4] = 0xD
+          cpu.cycle
+
+          (0..3).each do |r|
+            cpu.registers[r].must_equal(cpu.memory[cpu.i + r])
+          end
+        end
       end
 
     end
