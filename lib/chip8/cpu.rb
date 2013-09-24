@@ -4,7 +4,7 @@ require_relative 'registers'
 module Chip8
   class CPU
 
-    attr_accessor :memory, :pc, :registers, :stack
+    attr_accessor :memory, :pc, :registers, :stack, :i
 
     def initialize
       @pc = 0x200 # Program starts at 0x200 memory position
@@ -116,6 +116,12 @@ module Chip8
       when 0x9
         # Skip next instruction if VX != VY.
         @pc += 0x2 if @registers[@x] != @registers[@y]
+      when 0xA
+        # Sets I to NNN.
+        @i = @nnn
+      when 0xB
+        # Jump to location NNN + V0.
+        @pc = @nnn + @registers[0x0]
       end
 
     end # end execute

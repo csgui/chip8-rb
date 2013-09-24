@@ -471,6 +471,29 @@ describe Chip8::CPU do
         end
       end
 
+      describe 'instruction 0xANNN' do
+        it 'set register I to NNN value' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xA9
+          cpu.memory[0x201] = 0x25
+          cpu.cycle
+
+          cpu.i.must_equal(0x925)
+        end
+      end
+
+      describe 'instruction 0xBNNN' do
+        it 'jump to location NNN + V0' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xB1
+          cpu.memory[0x201] = 0x32
+          cpu.registers[0x0] = 0xB
+          cpu.cycle
+
+          cpu.pc.must_equal(0x13D)
+        end
+      end
+
     end
   end
 end
