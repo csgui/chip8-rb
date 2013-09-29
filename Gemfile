@@ -1,5 +1,8 @@
 source 'https://rubygems.org'
 
+gem 'gosu'
+gem 'texplay'
+
 group :development do
   gem 'pry'
 end
