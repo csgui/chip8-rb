@@ -499,7 +499,136 @@ describe Chip8::CPU do
       end
 
       describe 'instruction 0xDXYN' do
-        it 'draw a sprite at position VX, VY'
+        it 'detect pixel collision in first byte of the sprite' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD4
+          cpu.memory[0x201] = 0x71
+          cpu.i = 0xA
+
+          cpu.memory[cpu.i] = 0b11010001
+
+          cpu.vram[:sprite][0] = 0b10000
+
+          cpu.cycle
+
+          cpu.registers[0xF].must_equal(0x1)
+        end
+
+        it 'detect pixel collision in the middle byte of the sprite' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD4
+          cpu.memory[0x201] = 0x74
+          cpu.i = 0xA
+
+          cpu.memory[cpu.i]     = 0b11010001
+          cpu.memory[cpu.i + 1] = 0b10001
+          cpu.memory[cpu.i + 2] = 0b11010001
+          cpu.memory[cpu.i + 3] = 0b11010001
+
+          cpu.vram[:sprite][0] = 0b0
+          cpu.vram[:sprite][1] = 0b1011
+          cpu.vram[:sprite][2] = 0b0
+          cpu.vram[:sprite][3] = 0b0
+
+          cpu.cycle
+
+          cpu.registers[0xF].must_equal(0x1)
+        end
+
+        it 'detect pixel collision in the last byte of the sprite' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD4
+          cpu.memory[0x201] = 0x74
+          cpu.i = 0xA
+
+          cpu.memory[cpu.i]     = 0b11010001
+          cpu.memory[cpu.i + 1] = 0b11010001
+          cpu.memory[cpu.i + 2] = 0b11010001
+          cpu.memory[cpu.i + 3] = 0b11010001
+
+          cpu.vram[:sprite][0] = 0b0
+          cpu.vram[:sprite][1] = 0b0
+          cpu.vram[:sprite][2] = 0b0
+          cpu.vram[:sprite][3] = 0b11000
+
+          cpu.cycle
+
+          cpu.registers[0xF].must_equal(0x1)
+        end
+
+        it 'apply XOR bit operation properly without pixel collision' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD1
+          cpu.memory[0x201] = 0x15
+          cpu.i = 0xA
+          cpu.memory[cpu.i]     = 0xF0
+          cpu.memory[cpu.i + 1] = 0x80
+          cpu.memory[cpu.i + 2] = 0x80
+          cpu.memory[cpu.i + 3] = 0x80
+          cpu.memory[cpu.i + 4] = 0xF0
+
+          cpu.cycle
+
+          (0..4).each do |num|
+            cpu.vram[:sprite][num].must_equal(cpu.memory[cpu.i + num])
+          end
+          cpu.registers[0xF].must_equal(0x0)
+        end
+
+        it 'apply XOR bit operation properly with pixel collision' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD4
+          cpu.memory[0x201] = 0x65
+          cpu.i = 0xA
+
+          cpu.memory[cpu.i]     = 0b11010001
+          cpu.memory[cpu.i + 1] = 0b10000011
+          cpu.memory[cpu.i + 2] = 0b00110011
+          cpu.memory[cpu.i + 3] = 0b10000001
+          cpu.memory[cpu.i + 4] = 0b11100010
+
+          cpu.vram[:sprite][0] = 0b10001011
+          cpu.vram[:sprite][1] = 0b10001
+          cpu.vram[:sprite][2] = 0b111001
+          cpu.vram[:sprite][3] = 0b11111111
+          cpu.vram[:sprite][4] = 0b11001100
+
+          cpu.cycle
+
+          cpu.vram[:sprite][0].must_equal(0b1011010)
+          cpu.vram[:sprite][1].must_equal(0b10010010)
+          cpu.vram[:sprite][2].must_equal(0b1010)
+          cpu.vram[:sprite][3].must_equal(0b1111110)
+          cpu.vram[:sprite][4].must_equal(0b101110)
+
+          cpu.registers[0xF].must_equal(0x1)
+        end
+
+        it 'clear vram if same sprite is sent to vram' do
+          cpu.memory = []
+          cpu.memory[0x200] = 0xD1
+          cpu.memory[0x201] = 0x15
+          cpu.i = 0xA
+
+          cpu.memory[cpu.i]     = 0xF0
+          cpu.memory[cpu.i + 1] = 0x80
+          cpu.memory[cpu.i + 2] = 0x80
+          cpu.memory[cpu.i + 3] = 0x80
+          cpu.memory[cpu.i + 4] = 0xF0
+
+          cpu.vram[:sprite][0] = 0xF0
+          cpu.vram[:sprite][1] = 0x80
+          cpu.vram[:sprite][2] = 0x80
+          cpu.vram[:sprite][3] = 0x80
+          cpu.vram[:sprite][4] = 0xF0
+
+          cpu.cycle
+
+          (0..4).each do |num|
+            cpu.vram[:sprite][num].must_equal(0x0)
+          end
+          cpu.registers[0xF].must_equal(0x1)
+        end
       end
 
       describe 'instruction 0xEX9E' do
