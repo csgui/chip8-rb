@@ -4,7 +4,7 @@ require_relative 'registers'
 module Chip8
   class CPU
 
-    attr_accessor :memory, :pc, :registers, :stack, :i, :dt, :st
+    attr_accessor :memory, :vdp, :pc, :registers, :stack, :i, :dt, :st
 
     # TODO Change this implementation to a proper class
     attr_accessor :vram, :keyboard
@@ -27,10 +27,7 @@ module Chip8
     end
 
     def emulate
-      memory.ui.vram = @vram
-      memory.ui.keyboard = @keyboard
-
-      cycle while @pc < 0xFFF
+      cycle while not @halted
     end
 
     # The CPU instruction cycle.
@@ -73,7 +70,7 @@ module Chip8
 
     def execute
       @pc += 2
-      sleep 0.0008
+
       if @opcode == 0x00EE
         puts "DEBUG: Returns from a subroutine"
         puts "DEBUG: PC = #{@pc.to_s(16)} STACK = #{@stack}"
@@ -84,9 +81,16 @@ module Chip8
       end
 
       if @opcode == 0x00E0
-        vram[:sprite].each do |byte|
-          byte = 0x0
+        puts "DEBUG: Clear screen"
+        puts "DEBUG: VRAM = #{vdp.vram}"
+        puts "DEBUG: Execute instruction"
+        (0..32).each do |i|
+          (0..64).each do |j|
+            vdp.set_pixel(j, i, 0x0)
+          end
         end
+        puts "DEBUG: VRAM = #{vdp.vram}"
+        puts
       end
 
       case (@opcode & 0xF000) >> 12
@@ -128,17 +132,17 @@ module Chip8
         puts
       when 0x6 # Sets VX to NN.
         puts "DEBUG: Sets VX to NN"
-        puts "DEBUG: REGISTERS = #{@registers} X = #{@x.to_s(16)} NN = #{@nn.to_s(16)}"
+        puts "DEBUG: REGISTERS = #{@registers.v} X = #{@x.to_s(16)} NN = #{@nn.to_s(16)}"
         puts "DEBUG: Execute instruction"
         @registers[@x] = @nn
-        puts "DEBUG: REGISTERS = #{@registers} X = #{@x.to_s(16)} NN = #{@nn.to_s(16)}"
+        puts "DEBUG: REGISTERS = #{@registers.v} X = #{@x.to_s(16)} NN = #{@nn.to_s(16)}"
         puts
       when 0x7 # Adds NN to VX.
         puts "DEBUG: Adds NN to VX"
-        puts "DEBUG: VX = #{@registers[@x].to_s(16)} NN = #{@nn.to_s(16)}"
+        puts "DEBUG: REGISTERS = #{@registers.v} X = #{@x.to_s(16)} VX = #{@registers[@x].to_s(16)} NN = #{@nn.to_s(16)}"
         puts "DEBUG: Execute instruction"
         @registers[@x] += @nn
-        puts "DEBUG: VX = #{@registers[@x].to_s(16)} NN = #{@nn.to_s(16)}"
+        puts "DEBUG: REGISTERS = #{@registers.v} X = #{@x.to_s(16)} VX = #{@registers[@x].to_s(16)} NN = #{@nn.to_s(16)}"
         puts
       when 0x8
         case (@opcode & 0x000F)
@@ -272,21 +276,22 @@ module Chip8
 
         # Drawing is done in XOR mode and if a pixel is turned off as a result of drawing,
         # the VF register is set. This is used for collision detection.
+        pos_x = @registers[@x]
+        pos_y = @registers[@y]
         collision_detected = false
-        vram[:sprite] = Array.new(0xF, 0x0)
         sprite.each_with_index do |byte, i|
-          vram[:sprite][i] ^= byte
+
           (0..7).each do |num|
-            if(byte & (0x80 >> num) != 0) && (vram[:sprite][i] & (0x80 >> num) == 0)
-              collision_detected = true
+            if (byte & (0x80 >> num)) != 0
+              pixel = vdp.get_pixel(pos_x + num, pos_y + i)
+              collision_detected = true if pixel == 1
+              vdp.set_pixel(pos_x + num, pos_y + i, pixel ^= 1)
             end
           end
         end
 
         @registers[0xF] = collision_detected ? 0x1 : 0x0
 
-        vram[:x] = @registers[@x]
-        vram[:y] = @registers[@y]
         puts "DEBUG: I = #{@i.to_s(16)} N = #{@n.to_s(16)} X = #{@x.to_s(16)} Y = #{@y.to_s(16)} VF = #{@registers[0xF].to_s(16)}"
         puts
       when 0xE
@@ -320,8 +325,13 @@ module Chip8
           puts
         when 0x0A
           # Wait for a key press, store the value of the key in Vx.
-          # TODO implement
+          puts "DEBUG: Wait for a key press, store the value of the key in VX"
+          puts "DEBUG: PC = #{@pc.to_s(16)} KEYBOARD = #{@keyboard} VX = #{@registers[@x].to_s(16)}"
+          puts "DEBUG: Execute instruction"
           require 'pry'; binding.pry
+          @keyboard[1] != 0 ? @registers[@x] = @keyboard[@x] : @pc -= 2
+          puts "DEBUG: PC = #{@pc.to_s(16)} KEYBOARD = #{@keyboard} VX = #{@registers[@x].to_s(16)}"
+          puts
         when 0x15
           # Set delay timer to the value of register VX.
           puts "DEBUG: Set delay timer to the value of register VX"
@@ -341,10 +351,10 @@ module Chip8
         when 0x1E
           # Add the value stored in register VX to register I.
           puts "DEBUG: Add the value stored in register VX to register I"
-          puts "DEBUG: I = #{@i.to_s(16)} VX = #{@registers[@x].to_s(16)}"
+          puts "DEBUG: I = #{@i.to_s(16)} VX = #{@registers[@x].to_s(16)} X = #{@x.to_s(16)}"
           puts "DEBUG: Execute instruction"
           @i += @registers[@x]
-          puts "DEBUG: I = #{@i.to_s(16)} VX = #{@registers[@x].to_s(16)}"
+          puts "DEBUG: I = #{@i.to_s(16)} VX = #{@registers[@x].to_s(16)} X = #{@x.to_s(16)}"
           puts
         when 0x29
           # Sets I to the location of the sprite for the character in VX.

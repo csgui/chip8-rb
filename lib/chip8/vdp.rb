@@ -2,6 +2,7 @@ require 'gosu'
 require 'texplay'
 
 module Chip8
+
   class EmptyImageStub
     def initialize(w, h)
       @w, @h = w, h
@@ -20,7 +21,7 @@ module Chip8
     end
   end
 
-  class Display < Gosu::Window
+  class VDP < Gosu::Window
     attr_accessor :vram, :keyboard
 
     WIDTH = 64
@@ -32,30 +33,27 @@ module Chip8
       stub = EmptyImageStub.new(WIDTH * SCALE, HEIGHT * SCALE)
       @canvas = Gosu::Image.new(self, stub, false)
       self.caption = "Chip8-rb"
-      @clear = false
+      @vram = Array.new(WIDTH * HEIGHT, 0x0)
+      @keyboard = Array.new
     end
 
-    def clear_screen
-      @clear = true
+    def get_pixel(x, y)
+      vram[y * 64 + x]
+    end
+
+    def set_pixel(x, y, value)
+      vram[y * 64 + x] = value
     end
 
     def update
-      if @clear
-        @canvas.clear :color => :black
-      end
-
-      @clear = false
+      video = vram
 
       @canvas.paint do
-        y = @__window__.vram[:y]
-        @__window__.vram[:sprite].each do |line|
-        x = @__window__.vram[:x]
-          (0..7).each do |num|
-            color = line & (0x80 >> num) == 0 ? :black : :white
-            rect(x * SCALE, y * SCALE, (x + 1) * SCALE, (y + 1) * SCALE, :color => color, :fill => true)
-            x += 1
+        (0..32).each do |i|
+          (0..64).each do |j|
+            color = video[i * 64 + j] == 1 ? :white : :black
+            rect(j * SCALE, i * SCALE, (j + 1) * SCALE, (i + 1) * SCALE, :color => color, :fill => true)
           end
-          y += 1
         end
       end
     end

@@ -1,8 +1,6 @@
 module Chip8
   class Memory
 
-    attr_accessor :ui
-
     PROGRAM_OFFSET = 0x200
 
     # Built-in font set.
