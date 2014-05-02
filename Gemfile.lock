@@ -6,7 +6,7 @@ GEM
     coderay (1.0.9)
     diff-lcs (1.2.4)
     ffi (1.9.0-java)
-    gosu (0.7.48)
+    gosu (0.7.50)
     hashie (2.0.5)
     metaclass (0.0.1)
     method_source (0.8.2)
